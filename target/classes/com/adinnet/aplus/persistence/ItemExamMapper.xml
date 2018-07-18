@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.adinnet.aplus.persistence.ItemExamMapper">
+
+	<resultMap type="com.adinnet.aplus.model.ItemExam" id="resultMap">
+		<id property="id" column="id" javaType="long" />
+		<result property="examTitle" column="exam_title"/>
+		<result property="createTime" column="create_time"/>
+		<result property="modifyTime" column="modify_time"/>
+		<association property="item" javaType="com.adinnet.aplus.model.Item">
+            <id property="id" column="item_id"/>
+            <result property="name" column="item_name"/>
+            <result property="lessonId" column="item_lesson_id"/>
+            <result property="teacherId" column="item_teacher_id"/>
+            <result property="modelId" column="item_model_id"/>
+            <result property="description" column="item_description"/>
+            <result property="status" column="item_status"/>
+            <result property="videoUrl" column="item_video_url"/>
+            <result property="pageNum" column="item_page_num"/>
+            <result property="tag" column="item_tag"/>
+        </association>
+        <association property="exam" javaType="com.adinnet.aplus.model.Exam">
+            <id property="id" column="exam_id"/>
+            <result property="lessonId" column="exam_lesson_id"/>
+            <result property="description" column="exam_description"/>
+            <result property="status" column="exam_status"/>
+        </association>
+	</resultMap>
+
+	<sql id="selectSQL">
+select ie.*, 
+	i.name as item_name, i.lesson_id as item_lesson_id, i.teacher_id as item_teacher_id, i.model_id as item_model_id, i.description as item_description, i.status as item_status, i.video_url as item_video_url, i.page_num as item_page_num, i.tag as item_tag, i.knowledge as item_knowledge,
+    e.lesson_id as exam_lesson_id, e.description as exam_description, e.status as exam_status
+from tb_exam_item ie
+inner join tb_item i on ie.item_id=i.id
+inner join tb_exam e on ie.exam_id=e.id
+	</sql>
+	
+	<!-- Base Mapper -->
+
+	<select id="get" parameterType="hashmap" resultMap="resultMap">
+		<include refid="selectSQL"/>
+		<where>
+			<if test="id != null">
+				ie.id = #{id}
+			</if>
+		</where>
+		limit 0,1
+	</select>
+	
+	<select id="query" resultMap="resultMap">
+		<include refid="selectSQL"/>
+	</select>
+
+	<select id="queryByMap" parameterType="hashmap" resultMap="resultMap">
+		<include refid="selectSQL" />
+	</select>
+
+	<insert id="insert" parameterType="com.adinnet.aplus.model.ItemExam" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_exam_item (exam_id, item_id, exam_title)
+		values (#{exam.id}, #{item.id}, #{examTitle})
+	</insert>
+	
+	<update id="update" parameterType="com.adinnet.aplus.model.ItemExam">
+		update tb_exam_item set exam_id=#{exam.id}, item_id=#{item.id}, exam_title=#{examTitle}, modify_time=#{modifyTime}
+		where id = #{id}
+	</update>
+	
+	<delete id="delete" parameterType="com.adinnet.aplus.model.ItemExam">
+		delete from tb_exam_item 
+		<where>
+			<if test="id != null">
+				id = #{id}
+			</if>
+		</where>
+	</delete>
+	
+	<!-- End of Base Mapper -->
+
+</mapper>

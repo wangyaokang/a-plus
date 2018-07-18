@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.adinnet.aplus.persistence.FeedbackMapper">
+
+	<resultMap type="com.adinnet.aplus.model.Feedback" id="resultMap">
+		<id property="id" column="id" javaType="long" />
+		<result property="content" column="content"/>
+		<result property="status" column="status"/>
+		<result property="createTime" column="create_time"/>
+		<result property="modifyTime" column="modify_time"/>
+		<association property="user" javaType="com.adinnet.aplus.model.User">
+            <id property="id" column="user_id"/>
+            <result property="username" column="user_username"/>
+            <result property="mobile" column="user_mobile"/>
+            <result property="subject" column="user_subject"/>
+            <result property="schoolType" column="user_school_type"/>
+            <result property="schoolSystem" column="user_school_system"/>
+            <result property="grade" column="user_grade"/>
+            <result property="nickname" column="user_nickname"/>
+            <result property="sex" column="user_sex"/>
+            <result property="avatarUrl" column="user_avatar_url"/>
+            <result property="status" column="user_status"/>
+        </association>
+	</resultMap>
+
+	<sql id="selectSQL">
+select f.*,
+	u.username as user_username, u.mobile as user_mobile, u.subject as user_subject, u.school_type as user_school_type, u.school_system as user_school_system, u.grade as user_grade, u.nickname as user_nickname, u.sex as user_sex, u.avatar_url as user_avatar_url, u.status as user_status
+from tb_feedback f inner join tb_user u on f.user_id=u.id
+	</sql>
+	
+	<!-- Base Mapper -->
+
+	<select id="get" parameterType="hashmap" resultMap="resultMap">
+		<include refid="selectSQL"/>
+		<where>
+			<if test="id != null">
+				f.id = #{id}
+			</if>
+		</where>
+		limit 0,1
+	</select>
+	
+	<select id="query" resultMap="resultMap">
+		<include refid="selectSQL"/>
+	</select>
+
+	<select id="queryByMap" parameterType="hashmap" resultMap="resultMap">
+		<include refid="selectSQL" />
+		<where>
+			<if test="type != null">
+				f.type = #{type}
+			</if>
+			<if test="targetId != null">
+				and f.target_id = #{targetId}
+			</if>
+		</where>
+	</select>
+
+	<insert id="insert" parameterType="com.adinnet.aplus.model.Feedback" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_feedback (user_id, content, status)
+		values (#{user.id}, #{content}, #{status})
+	</insert>
+	
+	<update id="update" parameterType="com.adinnet.aplus.model.Feedback">
+		update tb_feedback set user_id=#{user.id}, content=#{content}, status=#{status}
+		where id = #{id}
+	</update>
+	
+	<delete id="delete" parameterType="com.adinnet.aplus.model.Feedback">
+		delete from tb_feedback 
+		<where>
+			<if test="id != null">
+				id = #{id}
+			</if>
+		</where>
+	</delete>
+	
+	<!-- End of Base Mapper -->
+
+</mapper>

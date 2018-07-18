@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.adinnet.aplus.persistence.ModelMapper">
+
+	<resultMap type="com.adinnet.aplus.model.Model" id="resultMap">
+		<id property="id" column="id" javaType="long" />
+		<result property="name" column="name" />
+		<result property="fbxUrl" column="fbx_url" />
+		<result property="status" column="status" />
+		<result property="createTime" column="create_time" />
+		<result property="modifyTime" column="modify_time" />
+		<!-- 用于显示字段 -->
+		<result property="courseName" column="course_name" />
+		<result property="thumbUrl" column="course_thumb_url" />
+		<result property="subject" column="course_subject" />
+		<result property="schoolType" column="material_school_type" />
+		<result property="schoolSystem" column="material_school_system" />
+		<result property="grade" column="material_grade" />
+		<result property="semester" column="material_semester" />
+		<result property="materialName" column="material_name" />
+		<result property="unitName" column="unit_name" />
+		<result property="lessonName" column="lesson_name" />
+		<association property="lesson" javaType="com.adinnet.aplus.model.Lesson">
+			<id property="id" column="lesson_id" />
+			<result property="unitId" column="lesson_unit_id" />
+			<result property="seq" column="lesson_seq" />
+			<result property="description" column="lesson_description" />
+			<result property="status" column="lesson_status" />
+		</association>
+	</resultMap>
+
+	<sql id="selectSQL">
+		select m.*,
+		l.unit_id as lesson_unit_id, l.seq as lesson_seq, l.description as
+		lesson_description, l.status as lesson_status,
+		u.material_id as unit_material_id, u.name as unit_name, u.seq as unit_seq,
+		u.description as unit_description, u.status as unit_status,
+		ma.school_type as material_school_type, ma.school_system as
+		material_school_system, ma.grade as material_grade, ma.course_id as
+		material_course_id, ma.semester as material_semester, ma.name as
+		material_name, ma.seq as material_seq, ma.supportAR as
+		material_supportAR, ma.description as material_description, ma.status
+		as material_status,
+		c.name as course_name, c.thumb_url as course_thumb_url, c.seq as course_seq,
+		c.subject as course_subject, c.status as course_status
+		from tb_model m inner join tb_lesson l on m.lesson_id=l.id
+		inner join tb_unit u on l.unit_id=u.id
+		inner join tb_material ma on u.material_id=ma.id
+		inner join tb_course c on ma.course_id=c.id
+	</sql>
+
+	<!-- Base Mapper -->
+
+	<select id="get" parameterType="hashmap" resultMap="resultMap">
+		<include refid="selectSQL" />
+		<where>
+			<if test="id != null">
+				m.id = #{id}
+			</if>
+		</where>
+		limit 0,1
+	</select>
+
+	<select id="query" resultMap="resultMap">
+		<include refid="selectSQL" />
+	</select>
+
+	<select id="queryByMap" parameterType="hashmap" resultMap="resultMap">
+		<include refid="selectSQL" />
+		<where>
+			<if test="status != null">
+				m.status = #{status}
+			</if>
+		</where>
+	</select>
+
+	<insert id="insert" parameterType="com.adinnet.aplus.model.Model"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into tb_model (lesson_id,
+		name, fbx_url, status)
+		values (#{lesson.id}, #{name}, #{fbxUrl},
+		#{status})
+	</insert>
+
+	<update id="update" parameterType="com.adinnet.aplus.model.Model">
+		update tb_model set
+		lesson_id=#{lesson.id}, name=#{name}, fbx_url=#{fbxUrl},
+		status=#{status}, modify_time=#{modifyTime}
+		where id = #{id}
+	</update>
+
+	<delete id="delete" parameterType="com.adinnet.aplus.model.Model">
+		delete from tb_model
+		<where>
+			<if test="id != null">
+				id = #{id}
+			</if>
+		</where>
+	</delete>
+
+	<!-- End of Base Mapper -->
+
+</mapper>
